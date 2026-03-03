@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKY OVERSEAS LEADS | Master Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1); --text: #f8fafc;
+        }
+        body {
+            background-color: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+        }
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center;
+        }
+        .login-card {
+            background: var(--glass); border: 1px solid var(--border); padding: 40px;
+            border-radius: 24px; width: 100%; max-width: 400px; text-align: center; backdrop-filter: blur(10px);
+        }
+        .app-container { display: none; }
+        header { padding: 20px 8%; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .nav-tabs { display: flex; gap: 20px; justify-content: center; padding: 30px 0; }
+        .tab-btn {
+            background: var(--glass); border: 1px solid var(--border); color: white;
+            padding: 15px 30px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); }
+        .content-section { margin: 0 8%; display: none; }
+        .content-section.active { display: block; }
+        .form-card { background: var(--glass); border: 1px solid var(--border); padding: 40px; border-radius: 30px; max-width: 600px; margin: auto; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: #94a3b8; }
+        .input-field {
+            width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 10px; color: white; box-sizing: border-box; outline: none;
+        }
+        .submit-btn {
+            width: 100%; padding: 18px; background: var(--primary); border: none;
+            color: white; border-radius: 12px; font-weight: 700; cursor: pointer;
+        }
+        .entry-table { width: 100%; border-collapse: collapse; background: var(--glass); border-radius: 15px; overflow: hidden; }
+        .entry-table th, .entry-table td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        .entry-table th { background: rgba(255,255,255,0.05); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h1 style="letter-spacing: 2px;">SKY OVERSEAS</h1>
+            <input type="text" id="user" placeholder="User Name" class="input-field" style="margin-bottom: 15px;">
+            <input type="password" id="pass" placeholder="Password" class="input-field" style="margin-bottom: 25px;">
+            <button class="submit-btn" onclick="handleLogin()">SECURE LOGIN</button>
+        </div>
+    </div>
+
+    <div class="app-container" id="mainApp">
+        <header>
+            <div style="font-weight: 800; font-size: 1.2rem;">SKY OVERSEAS LEADS</div>
+            <button class="tab-btn" style="padding: 8px 15px; font-size: 0.8rem;" onclick="location.reload()">LOGOUT</button>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="btnCust" onclick="showTab('customer')">1. CUSTOMER DETAILS</button>
+            <button class="tab-btn" id="btnDash" onclick="showTab('dashboard')">2. DASHBOARD (LIVE)</button>
+        </div>
+
+        <div id="customer" class="content-section active">
+            <div class="form-card">
+                <div class="input-group"><label>DATE</label><input type="date" id="fDate" class="input-field"></div>
+                <div class="input-group"><label>CUSTOMER NAME</label><input type="text" id="fName" class="input-field"></div>
+                <div class="input-group"><label>PRODUCT</label><input type="text" id="fProd" class="input-field"></div>
+                <div class="input-group"><label>QUANTITY</label><input type="number" id="fQty" class="input-field"></div>
+                <div class="input-group"><label>COMPANY NAME</label><input type="text" id="fComp" class="input-field"></div>
+                <div class="input-group"><label>MOBILE NO</label><input type="tel" id="fMob" class="input-field"></div>
+                <div class="input-group"><label>LOCATION</label><input type="text" id="fLoc" class="input-field"></div>
+                <div class="input-group"><label>REMARKS</label><textarea id="fRem" class="input-field" style="height: 80px; resize: none;"></textarea></div>
+                <button class="submit-btn" id="submitBtn" onclick="saveLead()">SUBMIT TO CLOUD</button>
+            </div>
+        </div>
+
+        <div id="dashboard" class="content-section">
+            <div style="overflow-x: auto;">
+                <table class="entry-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th><th>Customer</th><th>Product</th><th>Qty</th><th>Company</th><th>Mobile</th><th>Location</th><th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadData"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyWf7jqVRpqE1AVonxx5ElYOg3cCWxLq0I1ruXrHNKippcJ4GTBrbwcohsN-FILnAJE8w/exec';
+
+        function handleLogin() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u === 'SKYOVERSEAS' && p === 'Sky@2025') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+            } else { alert('Invalid Credentials'); }
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(tabId === 'dashboard') {
+                document.getElementById('btnDash').classList.add('active');
+                fetchLiveRecords();
+            } else {
+                document.getElementById('btnCust').classList.add('active');
+            }
+        }
+
+        function saveLead() {
+            const btn = document.getElementById('submitBtn');
+            const data = {
+                date: document.getElementById('fDate').value,
+                name: document.getElementById('fName').value,
+                prod: document.getElementById('fProd').value,
+                qty: document.getElementById('fQty').value,
+                comp: document.getElementById('fComp').value,
+                mob: document.getElementById('fMob').value,
+                loc: document.getElementById('fLoc').value,
+                rem: document.getElementById('fRem').value
+            };
+
+            btn.innerText = "Syncing...";
+            btn.disabled = true;
+
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
+            .then(() => {
+                alert('Success! Record added to Google Sheet.');
+                document.querySelectorAll('.input-field').forEach(i => i.value = '');
+                btn.innerText = "SUBMIT TO CLOUD";
+                btn.disabled = false;
+            }).catch(() => {
+                alert('Connection Error');
+                btn.innerText = "SUBMIT TO CLOUD"; btn.disabled = false;
+            });
+        }
+
+        async function fetchLiveRecords() {
+            const tableBody = document.getElementById('leadData');
+            tableBody.innerHTML = "<tr><td colspan='8' style='text-align:center'>Fetching Master Database...</td></tr>";
+            try {
+                const response = await fetch(scriptURL);
+                const leads = await response.json();
+                tableBody.innerHTML = "";
+                leads.reverse().forEach(l => {
+                    tableBody.innerHTML += `<tr><td>${l.date}</td><td>${l.name}</td><td>${l.prod}</td><td>${l.qty}</td><td>${l.comp}</td><td>${l.mob}</td><td>${l.loc}</td><td>${l.rem}</td></tr>`;
+                });
+            } catch (e) { tableBody.innerHTML = "<tr><td colspan='8' style='text-align:center; color:red;'>Sync Failed. Check Script Deployment.</td></tr>"; }
+        }
+    </script>
+</body>
+</html>
